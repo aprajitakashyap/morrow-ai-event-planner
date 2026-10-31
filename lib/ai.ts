@@ -37,7 +37,7 @@ function config(): ProviderConfig | null {
     return {
       apiKey: explicitKey,
       baseUrl: explicitUrl.replace(/\/$/, ""),
-      model: explicitModel || "gemini-2.5-flash",
+      model: explicitModel || "gemini-2.0-flash",
       provider: "custom",
     };
   }
@@ -47,7 +47,7 @@ function config(): ProviderConfig | null {
     return {
       apiKey: geminiKey,
       baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
-      model: explicitModel || "gemini-2.5-flash",
+      model: explicitModel || "gemini-2.0-flash",
       provider: "gemini",
     };
   }

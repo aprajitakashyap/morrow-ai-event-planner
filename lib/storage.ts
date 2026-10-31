@@ -94,3 +94,43 @@ export function takeTransientNotice(): string | null {
     return null;
   }
 }
+
+export function exportPlanAsJSON(saved: SavedPlan): void {
+  if (typeof window === "undefined") return;
+  const json = JSON.stringify(saved, null, 2);
+  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  const name =
+    saved.plan.brief.eventName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") || "morrow-plan";
+  anchor.download = `${name}-backup.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+export function parsePlanBackup(
+  rawText: string,
+): { success: true; data: SavedPlan } | { success: false; error: string } {
+  try {
+    const raw = JSON.parse(rawText) as unknown;
+    const parsed = savedPlanSchema.safeParse(raw);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "The selected file is not a valid Morrow plan backup.",
+      };
+    }
+    return { success: true, data: parsed.data };
+  } catch {
+    return {
+      success: false,
+      error: "The file could not be parsed as JSON.",
+    };
+  }
+}

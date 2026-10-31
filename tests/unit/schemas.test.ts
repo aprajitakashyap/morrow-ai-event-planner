@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { addDays, todayISO } from "@/lib/dates";
 import { parseBrief } from "@/lib/schemas";
+import { buildPlan } from "@/lib/planner";
 import { sampleBrief } from "@/lib/sample";
+import { emptySavedPlan, parsePlanBackup } from "@/lib/storage";
 import type { EventBrief } from "@/lib/types";
 
 function validBrief(overrides: Partial<EventBrief> = {}) {
@@ -62,5 +64,35 @@ describe("brief validation", () => {
     const result = parseBrief({ ...validBrief(), admin: true });
     expect(result.success).toBe(true);
     if (result.success) expect("admin" in result.data).toBe(false);
+  });
+});
+
+describe("plan backup import & parsing", () => {
+  it("successfully parses a valid plan backup", () => {
+    const saved = emptySavedPlan(buildPlan(sampleBrief()));
+    const serialized = JSON.stringify(saved);
+    const parsed = parsePlanBackup(serialized);
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.version).toBe(1);
+      expect(parsed.data.plan.brief.eventName).toBe(saved.plan.brief.eventName);
+    }
+  });
+
+  it("rejects invalid JSON", () => {
+    const parsed = parsePlanBackup("not-valid-json");
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error).toMatch(/could not be parsed as JSON/i);
+    }
+  });
+
+  it("rejects schema violations in backup", () => {
+    const parsed = parsePlanBackup(JSON.stringify({ version: 99, random: "data" }));
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error).toMatch(/not a valid Morrow plan backup/i);
+    }
   });
 });

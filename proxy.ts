@@ -24,7 +24,7 @@ export function proxy(request: NextRequest): NextResponse {
   const csp = [
     "default-src 'self'",
     `script-src ${scriptSrc}`,
-    `style-src 'self' 'nonce-${nonce}'`,
+    isDevelopment ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
     `connect-src ${connectSrc}`,
@@ -65,6 +65,6 @@ export function proxy(request: NextRequest): NextResponse {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|robots.txt|sitemap.xml|opengraph-image|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

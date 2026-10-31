@@ -27,3 +27,4 @@ blob-report/
 *.log
 .idea/
 .vscode/
+.vercel

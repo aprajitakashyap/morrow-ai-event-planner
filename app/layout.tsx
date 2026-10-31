@@ -17,10 +17,17 @@ const manrope = Manrope({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://morrow-planner.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Morrow — the calm way to plan a celebration",
     template: "%s · Morrow",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
   description:
     "A GenAI planning assistant for weddings, birthdays, and community events. Get a grounded budget, a working timeline, a vendor checklist, and personal ideas.",

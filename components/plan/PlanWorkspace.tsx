@@ -20,6 +20,8 @@ import { sampleBrief } from "@/lib/sample";
 import {
   clearSavedPlan,
   emptySavedPlan,
+  exportPlanAsJSON,
+  parsePlanBackup,
   readSavedPlan,
   stageBriefForEditing,
   takeTransientNotice,
@@ -156,6 +158,25 @@ export function PlanWorkspace() {
     router.replace("/plan");
   }
 
+  function importBackupFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result;
+      if (typeof content !== "string") return;
+      const res = parsePlanBackup(content);
+      if (!res.success) {
+        setNotice(res.error);
+        return;
+      }
+      const imported = { ...res.data, updatedAt: new Date().toISOString() };
+      writeSavedPlan(imported);
+      setState(imported);
+      setIsSample(false);
+      setNotice("Plan restored from backup. All changes are saved locally in your browser.");
+    };
+    reader.readAsText(file);
+  }
+
   const days = useMemo(
     () => (state ? daysUntil(state.plan.brief.date) : 0),
     [state],
@@ -171,7 +192,13 @@ export function PlanWorkspace() {
   }
 
   if (!state) {
-    return <EmptyWorkspace notice={notice} onDismiss={() => setNotice(null)} />;
+    return (
+      <EmptyWorkspace
+        notice={notice}
+        onDismiss={() => setNotice(null)}
+        onImportBackup={importBackupFile}
+      />
+    );
   }
 
   const { plan } = state;
@@ -243,6 +270,30 @@ export function PlanWorkspace() {
               <Icon name="download" size={16} />
               Calendar file
             </button>
+            <button
+              type="button"
+              className="button button--soft button--small"
+              onClick={() => exportPlanAsJSON(state)}
+            >
+              <Icon name="download" size={16} />
+              Backup JSON
+            </button>
+            <label className="button button--ghost button--small file-input-label">
+              <Icon name="upload" size={16} />
+              Restore JSON
+              <input
+                type="file"
+                accept=".json,application/json"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    importBackupFile(file);
+                    e.target.value = "";
+                  }
+                }}
+              />
+            </label>
             <button
               type="button"
               className="button button--ghost button--small"
@@ -407,9 +458,11 @@ export function PlanWorkspace() {
 function EmptyWorkspace({
   notice,
   onDismiss,
+  onImportBackup,
 }: {
   notice: string | null;
   onDismiss: () => void;
+  onImportBackup: (file: File) => void;
 }) {
   return (
     <div className="workspace">
@@ -452,6 +505,22 @@ function EmptyWorkspace({
             Start planning
             <Icon name="arrow-right" size={18} />
           </Link>
+          <label className="button button--soft file-input-label">
+            <Icon name="upload" size={16} />
+            Restore from backup
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="sr-only"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  onImportBackup(file);
+                  e.target.value = "";
+                }
+              }}
+            />
+          </label>
           <Link className="button button--text" href="/plan?demo=1">
             Explore a sample plan
             <Icon name="arrow-up-right" size={16} />
