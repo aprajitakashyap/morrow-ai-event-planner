@@ -159,7 +159,7 @@ npx playwright install chromium   # first run only
 npm run test:e2e
 ```
 
-The Playwright config starts `npm run start` automatically and runs against `http://127.0.0.1:3000`.
+The Playwright config builds and starts the production server automatically and runs against `http://127.0.0.1:3000`.
 
 ## Security and privacy
 

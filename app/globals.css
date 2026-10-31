@@ -4347,12 +4347,15 @@ progress::-moz-progress-bar {
     visibility: hidden;
     transition:
       transform 280ms var(--ease),
-      visibility 280ms var(--ease);
+      visibility 0s 280ms;
   }
 
   .copilot-panel.is-open {
     transform: translateX(0);
     visibility: visible;
+    transition:
+      transform 280ms var(--ease),
+      visibility 0s;
   }
 
   .copilot-close {

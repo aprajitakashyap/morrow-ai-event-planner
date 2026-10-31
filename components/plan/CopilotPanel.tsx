@@ -69,7 +69,12 @@ export function CopilotPanel({
   useEffect(() => {
     if (!open) return;
     previousFocus.current = document.activeElement as HTMLElement | null;
-    window.setTimeout(() => inputRef.current?.focus(), 30);
+    const focusInput = () => {
+      inputRef.current?.focus();
+    };
+    focusInput();
+    const timer = window.setTimeout(focusInput, 50);
+    const retryTimer = window.setTimeout(focusInput, 150);
 
     function onKeyDown(event: globalThis.KeyboardEvent) {
       if (event.key === "Escape") {
@@ -99,6 +104,8 @@ export function CopilotPanel({
 
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(retryTimer);
       document.removeEventListener("keydown", onKeyDown);
       previousFocus.current?.focus();
     };
